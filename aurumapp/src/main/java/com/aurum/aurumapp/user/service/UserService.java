@@ -34,7 +34,7 @@ public class UserService {
         var user = userRepository.findById(id);
         if (user.isPresent())
             return user.get();
-        throw new ResourceNotFoundException("User not found.");
+        throw new ResourceNotFoundException("Usuário não encontrado.");
     }
 
     @Transactional
@@ -50,7 +50,7 @@ public class UserService {
     public User authenticate(User user) {
         Optional<User> userReturned = userRepository.findByEmail(user.getEmail());
         if(!userReturned.isPresent() || !userReturned.get().getPassword().equals(user.getPassword())){
-            throw new BadCredentialsException("User not found.");
+            throw new BadCredentialsException("Usuário não encontrado.");
         }else return userReturned.get();
     }
 }

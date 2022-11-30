@@ -1,5 +1,7 @@
 package com.aurum.aurumapp.user.model;
 
+import java.math.BigInteger;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
