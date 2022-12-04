@@ -38,6 +38,8 @@ public class DataTreatment {
             // pega o stock do yahoo
             var yahooStock = this.findStock(stockGiven);
             Calendar to = Calendar.getInstance();
+            to.setTime(new Date());
+            to.add(Calendar.MONTH, -1);
             // pega o histórico da ação
             List<HistoricalQuote> stockList = yahooStock.getHistory(this.stringToCalendar(stockGiven.getInitialDate()),
                     to);
@@ -195,6 +197,50 @@ public class DataTreatment {
         this.organizeHist(histToReturn);
 
         return histToReturn;
+    }
+
+    public double currentStockValue(com.aurum.aurumapp.stock.model.Stock stockGiven) {
+        try {
+            var yahooStock = this.findStock(stockGiven);
+            var currentValue = yahooStock.getQuote().getPrice();
+            return currentValue.doubleValue();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0.0;
+        }
+    }
+
+    public double currentFixedIncomeValue(FixedIncomeModel fixedIncome) {
+        Calendar from = this.stringToCalendar(fixedIncome.getInitialDate());
+        Calendar to = this.stringToCalendar(fixedIncome.getFinalDate());
+        Calendar now = Calendar.getInstance();
+
+        int totalMonths = (to.get(Calendar.YEAR) * 12 + to.get(Calendar.MONTH))
+                - (from.get(Calendar.YEAR) * 12 + from.get(Calendar.MONTH));
+        int monthsForNow = (now.get(Calendar.YEAR) * 12 + now.get(Calendar.MONTH))
+                - (from.get(Calendar.YEAR) * 12 + from.get(Calendar.MONTH));
+
+        var finalValue = fixedIncome.getInitialValue() * fixedIncome.getYieldRate();
+        var gainPerMonth = (finalValue - fixedIncome.getInitialValue()) / (totalMonths - 1);
+        var value = fixedIncome.getInitialValue();
+
+        if (totalMonths > monthsForNow) {
+           return monthsForNow * gainPerMonth * value;
+        } else {
+            return finalValue;
+        }
+    }
+
+    public double currentCheckingAccountValue(CheckingAccount checkingAccount) {
+        Calendar from = this.stringToCalendar(checkingAccount.getInitialDate());
+        Calendar now = Calendar.getInstance();
+
+        int monthsForNow = (now.get(Calendar.YEAR) * 12 + now.get(Calendar.MONTH))
+                - (from.get(Calendar.YEAR) * 12 + from.get(Calendar.MONTH));
+
+        var value = checkingAccount.getInitialValue();
+
+        return monthsForNow * checkingAccount.getYieldRate() * value;
     }
 
     public Calendar stringToCalendar(String stringDate) {
