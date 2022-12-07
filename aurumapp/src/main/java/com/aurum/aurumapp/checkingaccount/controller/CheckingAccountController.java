@@ -46,4 +46,10 @@ public class CheckingAccountController {
         return ResponseEntity.ok(checkingAccountService.getCheckingAccounts());
     }
 
+    @PostMapping("/conclude/{id}")
+    public ResponseEntity<Void> concludeCheckingAccount(@PathVariable("id") long id) {
+        checkingAccountService.concludeCheckingAccount(id);
+        return ResponseEntity.ok().build();
+    }
+
 }

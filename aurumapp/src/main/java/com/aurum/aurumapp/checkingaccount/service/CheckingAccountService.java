@@ -61,4 +61,11 @@ public class CheckingAccountService {
     public List<CheckingAccount> getCheckingAccounts() {
         return checkingAccountRepository.findAll();
     }
+
+    @Transactional
+    public void concludeCheckingAccount(long id) {
+        var investmentType = investmentTypeRepository.findByInvestmentType("CHECKING_ACCOUNT").get();
+        var idTransaction = "" + investmentType.getId() + id;
+        transactionRepository.setStatus(Long.parseLong(idTransaction), Long.valueOf(2));
+    }
 }

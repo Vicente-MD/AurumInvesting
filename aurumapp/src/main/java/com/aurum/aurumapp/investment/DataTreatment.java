@@ -33,7 +33,7 @@ public class DataTreatment {
     }
 
     public List<InvestData> stockHist(com.aurum.aurumapp.stock.model.Stock stockGiven,
-            List<InvestData> generalHistory) {
+                                      List<InvestData> generalHistory) {
         try {
             // pega o stock do yahoo
             var yahooStock = this.findStock(stockGiven);
@@ -51,7 +51,7 @@ public class DataTreatment {
 
             for (HistoricalQuote stockHist : stockList) {
                 InvestData stock = new InvestData();
-                stock.setPrice(stockHist.getOpen().doubleValue());
+                stock.setPrice(stockHist.getOpen().doubleValue() * stockGiven.getQuantity());
                 stock.setMonth(stockHist.getDate().get(Calendar.MONTH) + 1);
                 stock.setYear(stockHist.getDate().get(Calendar.YEAR));
                 stocks.add(stock);
@@ -64,7 +64,8 @@ public class DataTreatment {
                     }
                 }
             }
-            stocks.get(0).setPrice(BigDecimal.valueOf(stockGiven.getPrice()).doubleValue());
+
+            stocks.get(0).setPrice(BigDecimal.valueOf(stockGiven.getPrice()).doubleValue() * stockGiven.getQuantity());
 
             List<InvestData> histToReturn = new ArrayList<>();
             histToReturn.addAll(generalHistory);
@@ -225,7 +226,7 @@ public class DataTreatment {
         var value = fixedIncome.getInitialValue();
 
         if (totalMonths > monthsForNow) {
-           return monthsForNow * gainPerMonth * value;
+            return monthsForNow * gainPerMonth * value;
         } else {
             return finalValue;
         }
@@ -240,7 +241,16 @@ public class DataTreatment {
 
         var value = checkingAccount.getInitialValue();
 
-        return monthsForNow * checkingAccount.getYieldRate() * value;
+        System.out.println("\n\n\t" + checkingAccount.getYieldRate() + "\n\n");
+
+        int i = 0;
+
+        while (monthsForNow > i) {
+            checkingAccount.setInitialValue(checkingAccount.getYieldRate() * checkingAccount.getInitialValue());
+            i += 1;
+        }
+
+        return checkingAccount.getInitialValue();
     }
 
     public Calendar stringToCalendar(String stringDate) {

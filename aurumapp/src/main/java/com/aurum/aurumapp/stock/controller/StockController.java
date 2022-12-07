@@ -45,5 +45,11 @@ public class StockController {
     public ResponseEntity<List<Stock>> getStocks() {
         return ResponseEntity.ok(stockService.getStocks());
     }
+
+    @PostMapping("/conclude/{id}")
+    public ResponseEntity<List<Stock>> concludeStock(@PathVariable("id") long id) {
+        stockService.concludeStock(id);
+        return ResponseEntity.ok().build();
+    }
     
 }

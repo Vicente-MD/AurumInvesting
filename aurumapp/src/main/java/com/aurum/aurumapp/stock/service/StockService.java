@@ -63,4 +63,11 @@ public class StockService {
     public List<Stock> getStocks() {
         return stockRepository.findAll();
     }
+
+    @Transactional
+    public void concludeStock(long id) {
+        var investmentType = investmentTypeRepository.findByInvestmentType("STOCK").get();
+        var idTransaction = "" + investmentType.getId() + id;
+        transactionRepository.setStatus(Long.parseLong(idTransaction), 2L);
+    }
 }

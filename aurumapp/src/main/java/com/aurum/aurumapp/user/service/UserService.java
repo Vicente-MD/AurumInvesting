@@ -53,4 +53,11 @@ public class UserService {
             throw new BadCredentialsException("Usuário não encontrado.");
         }else return userReturned.get();
     }
+
+    @Transactional
+    public void updateUser(User userGiven) {
+        getUserById(userGiven.getId());
+        userRepository.setUser(userGiven.getId(), userGiven.getName(),
+        userGiven.getEmail(), userGiven.getPassword());
+    }
 }

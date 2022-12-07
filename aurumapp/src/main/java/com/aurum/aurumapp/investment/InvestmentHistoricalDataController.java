@@ -36,7 +36,7 @@ public class InvestmentHistoricalDataController {
     private final WalletRepository walletRepository;
 
     @GetMapping("/history")
-    public ResponseEntity<?> getInvestmentHitory(@RequestBody Wallet wallet) {
+    public ResponseEntity<?> getInvestmentHistory(@RequestBody Wallet wallet) {
         // pega as transações com esse id de carteira
         var transactions = transactionRepository.findByWallet(wallet);
         if (!transactions.isEmpty()) {
@@ -57,7 +57,6 @@ public class InvestmentHistoricalDataController {
                     FixedIncomeModel fixedIncome = fixedIncomeRepository.findById(id).get();
                     // entra no cálculo de renda fixa, retornando um array disso
                     List<InvestData> temporary = new ArrayList<>();
-                    System.out.println(history);
                     if (!history.isEmpty()) {
                         temporary.addAll(history);
                         history.clear();
@@ -82,15 +81,13 @@ public class InvestmentHistoricalDataController {
                 }
             });
 
-            System.out.println(history);
-
             return ResponseEntity.ok(history);
         }
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/history/{idWallet}")
-    public ResponseEntity<?> getInvestmentHitoryParam(@PathVariable long idWallet) {
+    public ResponseEntity<?> getInvestmentHistoryParam(@PathVariable long idWallet) {
         // pega as transações com esse id de carteira
         var wallet = walletRepository.findById(idWallet).get();
         var transactions = transactionRepository.findByWallet(wallet);
@@ -112,7 +109,6 @@ public class InvestmentHistoricalDataController {
                     FixedIncomeModel fixedIncome = fixedIncomeRepository.findById(id).get();
                     // entra no cálculo de renda fixa, retornando um array disso
                     List<InvestData> temporary = new ArrayList<>();
-                    System.out.println(history);
                     if (!history.isEmpty()) {
                         temporary.addAll(history);
                         history.clear();
@@ -136,8 +132,6 @@ public class InvestmentHistoricalDataController {
                     history.addAll(dataTreatment.checkingAccountHist(checAccount, temporary));
                 }
             });
-
-            System.out.println(history);
 
             return ResponseEntity.ok(history);
         }
@@ -151,29 +145,23 @@ public class InvestmentHistoricalDataController {
         var transactions = transactionRepository.findByWallet(wallet);
 
         if (!transactions.isEmpty()) {
-
             List<Stock> stocks = new ArrayList<>();
             List<FixedIncomeModel> fixedIncomes = new ArrayList<>();
             List<CheckingAccount> checkingAccounts = new ArrayList<>();
-
             AllInvestmentData allInvestments = new AllInvestmentData(0, 0, 0);
-
             transactions.get().forEach(t -> {
-
                 Long id = Long.parseLong(Long.toString(t.getId()).substring(1));
-
                 double stockValue = 0.0;
                 double fixedIncomeValue = 0.0;
                 double checkingAccountValue = 0.0;
-
-                if (t.getInvestmentType().getInvestmentType().equals("STOCK")) {
+                if (t.getInvestmentType().getInvestmentType().equals("STOCK") && t.getStatus().getStatus().equals("ACTIVE")) {
                     Stock stock = stockRepository.findById(id).get();
-                    var currentPrice = dataTreatment.currentStockValue(stock);
+                    var currentPrice = dataTreatment.currentStockValue(stock) * stock.getQuantity();
                     stockValue = currentPrice + allInvestments.getTotalStock();
-                    stock.setPrice(currentPrice);
                     allInvestments.setTotalStock(stockValue);
+                    stock.setPrice(currentPrice);
                     stocks.add(stock);
-                } else if (t.getInvestmentType().getInvestmentType().equals("FIXED_INCOME")) {
+                } else if (t.getInvestmentType().getInvestmentType().equals("FIXED_INCOME") && t.getStatus().getStatus().equals("ACTIVE")) {
                     FixedIncomeModel fixedIncome = fixedIncomeRepository.findById(id).get();
                     var currentPrice = dataTreatment.currentFixedIncomeValue(fixedIncome);
                     fixedIncomeValue = currentPrice
@@ -181,12 +169,12 @@ public class InvestmentHistoricalDataController {
                     fixedIncome.setInitialValue(currentPrice);
                     allInvestments.setTotalFixedIncome(fixedIncomeValue);
                     fixedIncomes.add(fixedIncome);
-                } else if (t.getInvestmentType().getInvestmentType().equals("CHECKING_ACCOUNT")) {
+                } else if (t.getInvestmentType().getInvestmentType().equals("CHECKING_ACCOUNT") && t.getStatus().getStatus().equals("ACTIVE")) {
                     CheckingAccount checkingAccount = checkingAccountRepository.findById(id).get();
                     var currentPrice = dataTreatment.currentCheckingAccountValue(checkingAccount);
                     checkingAccountValue = currentPrice
                             + allInvestments.getTotalCheckingAccount();
-                    allInvestments.setTotalStock(checkingAccountValue);
+                    allInvestments.setTotalCheckingAccount(checkingAccountValue);
                     checkingAccount.setInitialValue(currentPrice);
                     checkingAccounts.add(checkingAccount);
                 }
